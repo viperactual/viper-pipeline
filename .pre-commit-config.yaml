@@ -1,0 +1,5 @@
+- repo: https://github.com/viperactual/viper-dockerfilelint
+  rev: v0.1.0
+  hooks:
+    - id: dockerfilelint
+      stages: [commit]
