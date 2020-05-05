@@ -10,11 +10,11 @@ ARG VCS_REF
 LABEL maintainer="Michael Noël <mike@viperframe.work>" \
       PHP="7.2" \
       NODE="12" \
-      org.label-schema.name="viperactual/viper-pipeline" \
+      org.label-schema.name="viperps/viper-pipeline" \
       org.label-schema.description=":coffee: Deploy PHP applications with Docker Images and GitLab CI." \
       org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.schema-version="1.0" \
-      org.label-schema.vcs-url="https://github.com/viperactual/viper-pipeline" \
+      org.label-schema.vcs-url="https://github.com/viperps/viper-pipeline" \
       org.label-schema.vcs-ref=$VCS_REF
 
 # --------------------------------------------------------------------------
@@ -32,7 +32,16 @@ USER root
 
 WORKDIR /tmp
 
+# --------------------------------------------------------------------------
+# Copy Install Scripts
+# --------------------------------------------------------------------------
+
 COPY ./php/scripts/*.sh /tmp/
+
+# --------------------------------------------------------------------------
+# Install
+# --------------------------------------------------------------------------
+
 RUN chmod +x /tmp/*.sh
 
 RUN bash ./packages.sh \

@@ -8,7 +8,7 @@ image: docker:latest
 
 variables:
   DOCKER_DRIVER: overlay2
-  NAMESPACE: viperactual/viper-pipeline
+  NAMESPACE: viperps/viper-pipeline
 
 services:
   - docker:dind
@@ -24,8 +24,8 @@ Debian 7.4:
     - docker pull php:$IMAGE_VERSION || true
     - docker pull $NAMESPACE:$IMAGE_VERSION || true
     - docker build --compress --cache-from $NAMESPACE:$IMAGE_VERSION --build-arg VCS_REF=$CI_COMMIT_SHORT_SHA --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t $NAMESPACE:$IMAGE_VERSION -f php/$IMAGE_VERSION/Dockerfile .
-    - docker run -t --rm viperactual/viper-pipeline:$IMAGE_VERSION -m
-    - docker run -t --rm -v $(pwd):/var/www/html viperactual/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-$IMAGE_VERSION.yaml v
+    - docker run -t --rm viperps/viper-pipeline:$IMAGE_VERSION -m
+    - docker run -t --rm -v $(pwd):/var/www/html viperps/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-$IMAGE_VERSION.yaml v
     - docker tag $NAMESPACE:$IMAGE_VERSION $NAMESPACE:latest
     - docker tag $NAMESPACE:$IMAGE_VERSION $NAMESPACE:7
     - docker push $NAMESPACE:$IMAGE_VERSION
@@ -41,7 +41,7 @@ Debian 7.3:
     - docker pull php:$IMAGE_VERSION || true
     - docker pull $NAMESPACE:$IMAGE_VERSION || true
     - docker build --compress --cache-from $NAMESPACE:$IMAGE_VERSION --build-arg VCS_REF=$CI_COMMIT_SHORT_SHA --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t $NAMESPACE:$IMAGE_VERSION -f php/7.3/Dockerfile .
-    - docker run -t --rm -v $(pwd):/var/www/html viperactual/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-7.3.yaml v
+    - docker run -t --rm -v $(pwd):/var/www/html viperps/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-7.3.yaml v
     - docker push $NAMESPACE:$IMAGE_VERSION
 
   when: always
@@ -54,7 +54,7 @@ Debian 7.2:
     - docker pull php:$IMAGE_VERSION || true
     - docker pull $NAMESPACE:$IMAGE_VERSION || true
     - docker build --compress --cache-from $NAMESPACE:$IMAGE_VERSION --build-arg VCS_REF=$CI_COMMIT_SHORT_SHA --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t $NAMESPACE:$IMAGE_VERSION -f php/7.2/Dockerfile .
-    - docker run -t --rm -v $(pwd):/var/www/html viperactual/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-7.2.yaml v
+    - docker run -t --rm -v $(pwd):/var/www/html viperps/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-7.2.yaml v
     - docker push $NAMESPACE:$IMAGE_VERSION
   when: always
 
@@ -180,7 +180,7 @@ Chromium 7.4:
     - docker pull php:$IMAGE_VERSION || true
     - docker pull $NAMESPACE:$IMAGE_VERSION || true
     - docker build --compress --cache-from $NAMESPACE:$IMAGE_VERSION --build-arg VCS_REF=$CI_COMMIT_SHORT_SHA --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t $NAMESPACE:$IMAGE_VERSION -f php/7.4/chromium/Dockerfile .
-    - docker run -t --rm -v $(pwd):/var/www/html viperactual/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-7.4.yaml v
+    - docker run -t --rm -v $(pwd):/var/www/html viperps/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-7.4.yaml v
     - docker push $NAMESPACE:$IMAGE_VERSION
   when: always
   dependencies:
@@ -194,7 +194,7 @@ Chromium 7.3:
     - docker pull php:$IMAGE_VERSION || true
     - docker pull $NAMESPACE:$IMAGE_VERSION || true
     - docker build --compress --cache-from $NAMESPACE:$IMAGE_VERSION --build-arg VCS_REF=$CI_COMMIT_SHORT_SHA --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t $NAMESPACE:$IMAGE_VERSION -f php/7.3/chromium/Dockerfile .
-    - docker run -t --rm -v $(pwd):/var/www/html viperactual/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-7.3.yaml v
+    - docker run -t --rm -v $(pwd):/var/www/html viperps/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-7.3.yaml v
     - docker push $NAMESPACE:$IMAGE_VERSION
   when: always
   dependencies:
@@ -208,7 +208,7 @@ Chromium 7.2:
     - docker pull php:$IMAGE_VERSION || true
     - docker pull $NAMESPACE:$IMAGE_VERSION || true
     - docker build --compress --cache-from $NAMESPACE:$IMAGE_VERSION --build-arg VCS_REF=$CI_COMMIT_SHORT_SHA --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t $NAMESPACE:$IMAGE_VERSION -f php/7.2/chromium/Dockerfile .
-    - docker run -t --rm -v $(pwd):/var/www/html viperactual/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-7.2.yaml v
+    - docker run -t --rm -v $(pwd):/var/www/html viperps/viper-pipeline:$IMAGE_VERSION goss -g tests/goss-7.2.yaml v
     - docker push $NAMESPACE:$IMAGE_VERSION
   when: always
   dependencies:

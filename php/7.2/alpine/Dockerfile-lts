@@ -10,11 +10,11 @@ ARG VCS_REF
 LABEL maintainer="Michael Noël <mike@viperframe.work>" \
       PHP="7.2" \
       NODE="12.16.1" \
-      org.label-schema.name="viperactual/viper-pipeline" \
+      org.label-schema.name="viperps/viper-pipeline" \
       org.label-schema.description=":coffee: Deploy PHP applications with Docker Images and GitLab CI." \
       org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.schema-version="1.0" \
-      org.label-schema.vcs-url="https://github.com/viperactual/viper-pipeline" \
+      org.label-schema.vcs-url="https://github.com/viperps/viper-pipeline" \
       org.label-schema.vcs-ref=$VCS_REF
 
 # --------------------------------------------------------------------------
@@ -41,6 +41,10 @@ COPY ./php/scripts/alpine/*.sh /tmp/
 COPY --from=composer:1 /usr/bin/composer /usr/bin/composer
 COPY --from=mhart/alpine-node:12.16.1 /usr/bin/node /usr/bin/
 COPY --from=mhart/alpine-node:12.16.1 /usr/lib/libgcc* /usr/lib/libstdc* /usr/lib/* /usr/lib/
+
+# --------------------------------------------------------------------------
+# Install
+# --------------------------------------------------------------------------
 
 RUN chmod +x /tmp/*.sh \
     && adduser -D $IMAGE_USER \
