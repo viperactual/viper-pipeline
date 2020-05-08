@@ -48,7 +48,7 @@ COPY --from=mhart/alpine-node:12.16.1 /usr/lib/libgcc* /usr/lib/libstdc* /usr/li
 
 RUN chmod +x /tmp/*.sh \
     && adduser -D $IMAGE_USER \
-    && mkdir -p /var/www/html \
+    && mkdir -p /var/www \
     && apk add --update --no-cache bash \
     && bash ./packages.sh \
     && bash ./extensions.sh \
@@ -62,6 +62,6 @@ RUN chmod +x /tmp/*.sh \
 
 USER $IMAGE_USER
 
-WORKDIR /var/www/html
+WORKDIR /var/www
 
 CMD ["php", "-a"]

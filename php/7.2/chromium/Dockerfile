@@ -49,4 +49,4 @@ RUN bash ./packages.sh \
 
 USER $IMAGE_USER
 
-WORKDIR /var/www/html
+WORKDIR /var/www

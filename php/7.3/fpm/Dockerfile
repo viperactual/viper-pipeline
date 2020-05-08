@@ -49,7 +49,7 @@ RUN bash ./packages.sh \
     && bash ./node.sh \
     && adduser --disabled-password --gecos "" $IMAGE_USER && \
     echo "$IMAGE_USER  ALL = ( ALL ) NOPASSWD: ALL" >> /etc/sudoers && \
-    mkdir -p /var/www/html && \
+    mkdir -p /var/www && \
     chown -R $IMAGE_USER:$IMAGE_USER /var/www $HOME \
     && composer global require "hirak/prestissimo:^0.3"  \
     && rm -rf ~/.composer/cache/* \
@@ -59,4 +59,4 @@ RUN bash ./packages.sh \
 
 USER $IMAGE_USER
 
-WORKDIR /var/www/html
+WORKDIR /var/www
