@@ -1,4 +1,5 @@
-- repo: https://github.com/viperactual/viper-dockerfilelint
+repos:
+- repo: https://github.com/pryorda/dockerfilelint-precommit-hooks
   rev: v0.1.0
   hooks:
     - id: dockerfilelint

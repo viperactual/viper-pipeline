@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euf -o pipefail
+set -euo pipefail
 
 apk --update --no-cache add \
   bzip2 \
@@ -34,20 +34,25 @@ apk --update --no-cache add \
   sqlite-dev \
   zlib-dev
 
-if [[ $PHP_VERSION == "7.4" || $PHP_VERSION == "7.3" ]]; then
-  apk --update --no-cache add libzip-dev libsodium-dev
+apk --update --no-cache add libzip-dev libsodium-dev
+
+if [[ $PHP_VERSION == "8.0" ]]; then
+  docker-php-ext-configure ldap
+  docker-php-ext-install -j "$(nproc)" ldap
+  PHP_OPENSSL=yes docker-php-ext-configure imap --with-kerberos --with-imap-ssl
+  docker-php-ext-install -j "$(nproc)" imap
+  docker-php-ext-install -j "$(nproc)" exif pcntl bcmath bz2 calendar intl mysqli opcache pdo_mysql pdo_pgsql pgsql soap xsl zip gmp
+  docker-php-source delete
 else
-  apk --no-cache add --repository http://dl-cdn.alpinelinux.org/alpine/v3.5/community libzip-dev
+  docker-php-ext-configure ldap
+  docker-php-ext-install -j "$(nproc)" ldap
+  PHP_OPENSSL=yes docker-php-ext-configure imap --with-kerberos --with-imap-ssl
+  docker-php-ext-install -j "$(nproc)" imap
+  docker-php-ext-install -j "$(nproc)" exif xmlrpc pcntl bcmath bz2 calendar intl mysqli opcache pdo_mysql pdo_pgsql pgsql soap xsl zip gmp
+  docker-php-source delete
 fi
 
-docker-php-ext-configure ldap
-docker-php-ext-install -j "$(nproc)" ldap
-PHP_OPENSSL=yes docker-php-ext-configure imap --with-kerberos --with-imap-ssl
-docker-php-ext-install -j "$(nproc)" imap
-docker-php-ext-install -j "$(nproc)" exif xmlrpc pcntl bcmath bz2 calendar intl mysqli opcache pdo_mysql pdo_pgsql pgsql soap xsl zip gmp
-docker-php-source delete
-
-if [[ $PHP_VERSION == "7.4" ]]; then
+if [[ $PHP_VERSION == "8.0" || $PHP_VERSION == "7.4" ]]; then
   docker-php-ext-configure gd --with-freetype --with-jpeg
 else
   docker-php-ext-configure gd \
@@ -59,40 +64,21 @@ fi
 
 docker-php-ext-install -j "$(nproc)" gd
 
-if [[ $PHP_VERSION == "7.4" || $PHP_VERSION == "7.3" ]]; then
-  git clone --depth 1 -b 2.9.0 "https://github.com/xdebug/xdebug" \
-    && cd xdebug \
-    && phpize \
-    && ./configure \
-    && make clean \
-    && make \
-    && make install \
-    && docker-php-ext-enable xdebug
 
-elif [[ $PHP_VERSION == "7.2" ]]; then
-  git clone --depth 1 -b 2.7.2 "https://github.com/xdebug/xdebug" \
-    && cd xdebug \
-    && phpize \
-    && ./configure \
-    && make \
-    && make install \
-    && docker-php-ext-enable xdebug
-else
-  apk --update --no-cache add \
-    libmcrypt-dev \
-    libmcrypt \
-
-    docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) mcrypt
-
-  pecl install xdebug \
-    && docker-php-ext-enable xdebug
-fi
+git clone --depth 1 -b 3.0.2 "https://github.com/xdebug/xdebug" \
+  && cd xdebug \
+  && phpize \
+  && ./configure \
+  && make clean \
+  && make \
+  && make install \
+  && docker-php-ext-enable xdebug
 
 docker-php-source extract \
-  && curl -L -o /tmp/redis.tar.gz "https://github.com/phpredis/phpredis/archive/5.1.1.tar.gz" \
+  && curl -L -o /tmp/redis.tar.gz "https://github.com/phpredis/phpredis/archive/5.3.3.tar.gz" \
   && tar xfz /tmp/redis.tar.gz \
   && rm -r /tmp/redis.tar.gz \
-  && mv phpredis-5.1.1 /usr/src/php/ext/redis \
+  && mv phpredis-5.3.3 /usr/src/php/ext/redis \
   && docker-php-ext-install redis \
   && docker-php-source delete
 
@@ -116,23 +102,55 @@ docker-php-source extract \
   && apk del .cassandra-deps \
   && docker-php-source delete
 
-pecl install imagick \
-  && docker-php-ext-enable imagick
+if [[ $PHP_VERSION == "8.0" ]]; then
+  # AMQP
+  docker-php-source extract \
+    && mkdir /usr/src/php/ext/amqp \
+    && curl -L https://github.com/php-amqp/php-amqp/archive/master.tar.gz | tar -xzC /usr/src/php/ext/amqp --strip-components=1 \
+    && docker-php-ext-install amqp \
+    && docker-php-source delete
 
-pecl install mongodb \
-  && docker-php-ext-enable mongodb
+  # Imagick
+  mkdir /usr/local/src \
+    && cd /usr/local/src \
+    && git clone https://github.com/Imagick/imagick \
+    && cd imagick \
+    && phpize \
+    && ./configure \
+    && make \
+    && make install \
+    && cd .. \
+    && rm -rf imagick \
+    && docker-php-ext-enable imagick
 
-pecl install amqp \
-  && docker-php-ext-enable amqp
+  # XMLRPC
+  mkdir /usr/local/src/xmlrpc \
+    && cd /usr/local/src/xmlrpc \
+    && curl -L https://pecl.php.net/get/xmlrpc-1.0.0RC1.tgz | tar -xzC /usr/local/src/xmlrpc --strip-components=1 \
+    && phpize \
+    && ./configure \
+    && make \
+    && make install \
+    && cd .. \
+    && rm -rf xmlrpc \
+    && docker-php-ext-enable xmlrpc
+
+    pecl install mongodb \
+      && docker-php-ext-enable mongodb
+else
+  pecl install amqp imagick mongodb \
+    && docker-php-ext-enable amqp imagick mongodb
+fi
 
 git clone "https://github.com/php-memcached-dev/php-memcached.git" \
-  && cd php-memcached \
-  && phpize \
-  && ./configure --disable-memcached-sasl \
-  && make \
-  && make install \
-  && cd ../ && rm -rf php-memcached \
-  && docker-php-ext-enable memcached
+    && cd php-memcached \
+    && phpize \
+    && ./configure --disable-memcached-sasl \
+    && make \
+    && make install \
+    && cd ../ && rm -rf php-memcached \
+    && docker-php-ext-enable memcached
+
 { \
     echo 'opcache.enable=1'; \
     echo 'opcache.revalidate_freq=0'; \
@@ -157,3 +175,10 @@ git clone "https://github.com/php-memcached-dev/php-memcached.git" \
 } > /usr/local/etc/php/conf.d/apcu-recommended.ini
 
 echo "memory_limit=1G" > /usr/local/etc/php/conf.d/zz-conf.ini
+
+if [[ $PHP_VERSION == "8.0" ]]; then
+  # https://xdebug.org/docs/upgrade_guide#changed-xdebug.coverage_enable
+  echo 'xdebug.mode=coverage' > /usr/local/etc/php/conf.d/20-xdebug.ini
+else
+  echo 'xdebug.coverage_enable=1' > /usr/local/etc/php/conf.d/20-xdebug.ini
+fi
